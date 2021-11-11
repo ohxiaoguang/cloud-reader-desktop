@@ -27,9 +27,11 @@ function openPdfWin(pdfUrl){
   pdfWin.maximize()
   
   pdfWin.loadURL(pdfUrl)
+  
 }
 
 async function createWindow() {
+  
   // Create the browser window.
   const win = new BrowserWindow({
     width: 1035,
@@ -38,9 +40,12 @@ async function createWindow() {
       
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
-      nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
-      contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION,
-      preload: path.join(__dirname, 'preload.js'),
+      // nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
+      // contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION,
+      nodeIntegration: true, // is default value after Electron v5
+      contextIsolation: false, // protect against prototype pollution
+      enableRemoteModule: true, //this must be true
+      // preload: path.join(__dirname, 'preload.js'),
       // 插件支持
       plugins :true,
     }

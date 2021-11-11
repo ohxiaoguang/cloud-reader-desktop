@@ -45,11 +45,20 @@
 
 <script>
  import axios from 'axios';
+ const {remote} = window.require('electron')
+ const fs = window.require('fs')
 
-const fileDirPath = window.fileDirPath
-const ipcRenderer  = window.ipcRenderer 
-const path = window.path
+// const ipcRenderer  = window.ipcRenderer 
+const { ipcRenderer } =window.require('electron') 
+const path =window.require("path")
 
+var fileDirPath = "D:\\Code\\electron\\cloud-reader-desktop\\dist_electron\\file";
+// var fileDirPath = path.join(__dirname, "file");
+// console.log(fs.existsSync(fileDirPath))
+// if (!fs.existsSync(fileDirPath)) {
+//     fs.mkdirSync(fileDirPath);
+//     console.log("文件夹创建成功");
+// }
 
 export default {
   components: {

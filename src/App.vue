@@ -6,6 +6,7 @@
 
 <script>
 import HomePage from './pages/HomePage.vue'
+const {remote} = window.require('electron')
 
 export default {
   name: 'App',

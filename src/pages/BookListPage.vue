@@ -23,9 +23,15 @@
 <script>
  import axios from 'axios';
 
- const fileDirPath = window.fileDirPath
-const ipcRenderer  = window.ipcRenderer 
-const path = window.path
+ const {remote} = window.require('electron')
+ const fs = window.require('fs')
+
+// const ipcRenderer  = window.ipcRenderer 
+const { ipcRenderer } =window.require('electron') 
+const path = window.require("path")
+
+var fileDirPath = "D:\\Code\\electron\\cloud-reader-desktop\\dist_electron\\file";
+// var fileDirPath = path.join(__dirname, "file");
 
 export default {
     data(){
