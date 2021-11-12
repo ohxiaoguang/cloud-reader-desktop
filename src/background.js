@@ -26,7 +26,8 @@ function openPdfWin(pdfUrl){
   })
   pdfWin.maximize()
   
-  pdfWin.loadURL(pdfUrl)
+  // pdfWin.loadURL(pdfUrl)
+  pdfWin.loadURL('file://' + __dirname + '/pdfviewer/web/viewer.html?file=http://110.42.188.51/book/rangePreview/1' );
   
 }
 
