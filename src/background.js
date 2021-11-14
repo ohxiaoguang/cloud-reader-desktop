@@ -3,6 +3,10 @@
 import { app, protocol, BrowserWindow,BrowserView,ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 const path = require('path')
+const fs = require('fs')
+var url = require("url");
+var http = require("http");
+
 // import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
@@ -21,14 +25,55 @@ function openPdfWin(pdfUrl){
   const pdfWin = new BrowserWindow({
     webPreferences: {
       // 插件支持
-      plugins :true,
+      plugins :true,webSecurity: false,
     }
   })
   pdfWin.maximize()
   
   // pdfWin.loadURL(pdfUrl)
-  pdfWin.loadURL('file://' + __dirname + '/pdfviewer/web/viewer.html?file=http://110.42.188.51/book/rangePreview/1' );
+
+  // pdfWin.loadURL('file://' + __dirname + '/bundled/pdfviewer/web/viewer.html?file='+fileBlob+'' );
+
+  if(isDevelopment){
+    pdfWin.loadURL('file://' + __dirname + '/bundled/pdfviewer/web/viewer.html?file='+
+    encodeURIComponent('http://localhost:9090/getPdf?pdfName=a.pdf#page=100') );
+  }else{
+    pdfWin.loadURL('file://' + __dirname + '/pdfviewer/web/viewer.html?file='+
+    encodeURIComponent('http://localhost:9090/getPdf?pdfName=a.pdf#page=100') );
+  }
+
   
+  
+}
+
+function createHttpServer(){
+  var server = http.createServer(function(req, res){
+
+    let pathname = url.parse(req.url,true).pathname;
+
+    if(pathname == '/getPdf'){
+      let pdfName = url.parse(req.url,true).query.pdfName
+      var filepath = __dirname +'\\file\\'+ pdfName;
+      fs.readFile(filepath, function (err, data) {
+          if (err) {
+              console.log("读取文件失败");
+              res.write('404')
+          } else {
+              console.log("读取文件成功！");
+              res.write(data);
+          }
+          res.end();
+      });
+    }
+    else if(pathname == '/updatePage'){
+      // get获取数据
+      console.log(url.parse(req.url,true).query)
+      res.end('method2')
+    }
+    
+
+  })
+  server.listen('9090', '127.0.0.1');
 }
 
 async function createWindow() {
@@ -46,6 +91,7 @@ async function createWindow() {
       nodeIntegration: true, // is default value after Electron v5
       contextIsolation: false, // protect against prototype pollution
       enableRemoteModule: true, //this must be true
+      webSecurity: false,
       // preload: path.join(__dirname, 'preload.js'),
       // 插件支持
       plugins :true,
@@ -99,6 +145,8 @@ app.on('ready', async () => {
     }
   }
   createWindow()
+  // 开启http服务器
+  createHttpServer()
 })
 
 // Exit cleanly on request from parent process in development mode.

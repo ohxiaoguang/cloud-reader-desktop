@@ -1,24 +1,6 @@
-# vue-demo1
+todo
+    1 上传下载 无文件时不能浏览
+    2 云文件管理
+    3 进度记录
 
-## Project setup
-```
-npm install
-```
-
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+    
