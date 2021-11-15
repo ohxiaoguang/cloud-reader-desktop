@@ -8,15 +8,15 @@
         <div class="aside">
       <a-menu  mode="inline" :default-selected-keys="['1']">
         <a-menu-item key="1" @click="menuClick('/books')">
-          <a-icon type="user" />
+          <FileSearchOutlined />
           <span>书架</span>
         </a-menu-item>
         <a-menu-item key="2">
-          <a-icon type="video-camera" />
+          <MehOutlined />
           <span>个人</span>
         </a-menu-item>
         <a-menu-item key="3"  @click="menuClick('/setting')">
-          <a-icon type="upload" />
+          <SettingOutlined />
           <span>设置</span>
         </a-menu-item>
       </a-menu>
@@ -59,10 +59,11 @@ var fileDirPath = "D:\\Code\\electron\\cloud-reader-desktop\\dist_electron\\file
 //     fs.mkdirSync(fileDirPath);
 //     console.log("文件夹创建成功");
 // }
+import {SettingOutlined,MehOutlined,FileSearchOutlined} from '@ant-design/icons-vue'
 
 export default {
   components: {
-    
+    SettingOutlined,MehOutlined,FileSearchOutlined
   },
   name: 'HelloWorld',
   props: {
@@ -80,15 +81,6 @@ export default {
     },
 
 
-
-
-
-    // readFile(){
-    //   const fs = window.fs
-    //   let data = fs.readFileSync(fileDirPath+'/a.pdf','utf8')
-    //   console.log(data)
-    //   this.text = data
-    // } ,
     downFile(url, fileName) {
           const request = window.request
           const fs = window.fs
