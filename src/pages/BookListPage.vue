@@ -39,8 +39,8 @@
                     />
                     <a-card-meta :title="val.bookName">
                         <template #description>
-                            <CloudDownloadOutlined />
-                            <a-button style="float:right" type="primary" size="small" @click="openPdf">阅读</a-button>
+                            <CloudDownloadOutlined :id="`download${val.id}`" @click="downloadBook(val.id,val.bookName+'.'+val.fileType)"/>
+                            <a-button style="float:right" type="primary" size="small" @click="openPdf('zzg_'+val.bookName+'.'+val.fileType)">阅读</a-button>
                         </template>
                     </a-card-meta>
                 
@@ -52,19 +52,20 @@
 </template>
 
 <script>
- import axios from 'axios';
-
- const {remote} = window.require('electron')
- const fs = window.require('fs')
 
 // const ipcRenderer  = window.ipcRenderer 
-const { ipcRenderer } =window.require('electron') 
-const path = window.require("path")
 
-var fileDirPath = "D:\\Code\\electron\\cloud-reader-desktop\\dist_electron\\file";
+
+
+// var fileDirPath = "D:\\Code\\electron\\cloud-reader-desktop\\dist_electron\\file";
 // var fileDirPath = path.join(__dirname, "file");
-import {CloudUploadOutlined,CloudDownloadOutlined}  from '@ant-design/icons-vue'
+import {CloudUploadOutlined,CloudDownloadOutlined,SmileOutlined}  from '@ant-design/icons-vue'
+import { notification  } from 'ant-design-vue';
+import {  h } from 'vue';
+
+
 export default {
+    inject: ['$axios','$constDict','$ipcRenderer','$path','$serverHost'],
     components: {
         CloudUploadOutlined,CloudDownloadOutlined
     },
@@ -77,12 +78,44 @@ export default {
     ,
 
     methods:{
+        downloadBook(id,bookName){
+            const key = 'updatable';
+            
+            notification.open({
+                key,
+                message: '正在下载...',
+                description: bookName,
+                duration: 0,
+                placement:'bottomRight',
+                // style: {
+                //     width: '300px',
+                //     marginRight: `${0}px`,
+                // },
+                icon: h(SmileOutlined, { style: 'color: #108ee9' }),
+
+            });
+            this.$ipcRenderer.on('download-book-reply', (event, arg) => {
+                    if(arg == 'success'){
+                        notification['success']({
+                            key,
+                            message: '下载完成',
+                            description: bookName,
+                            duration: 5,
+                            placement:'bottomRight'
+                            });
+                    }
+                })
+            this.$ipcRenderer.send('download-book',id,'zzg_'+bookName)
+            
+            // console.log(bookPath)
+            // console.log(this.$constDict.filePath)
+        },
         onSearch(searchValue){
             console.log(searchValue)
             console.log(this.value)
         },
         fetchBooks(){
-            axios.get('http://110.42.188.51/book/page')
+            this.$axios.get(this.$serverHost+'/book/page')
             .then(res=>{
                 const result = res.data
                 // console.log(result)
@@ -93,8 +126,9 @@ export default {
                 console.log(err);
             })
         },
-        openPdf(){
-            ipcRenderer.send('open-pdf',path.join(fileDirPath, 'a.pdf#page=101'))
+        openPdf(filename){
+            this.$ipcRenderer.send('open-pdf',filename,'1')
+                
         },
     }
     ,
