@@ -6,6 +6,30 @@ const path = require('path')
 const fs = require('fs')
 var url = require("url");
 var http = require("http");
+var request = require('request');
+
+
+const os = require('os')
+//全局数据
+global.constDict = {
+  bookPath:path.join(os.homedir(),'cloud_reader_desktop','books')
+};
+// 初始化文件目录
+if(!fs.existsSync(constDict.bookPath)){
+  fs.mkdir(constDict.bookPath,{recursive:true},(err)=>{
+    if(err){
+        console.log('创建目录错误：',constDict.bookPath);
+        throw err;
+        
+    }else{
+        console.log('创建目录成功：',constDict.bookPath);
+    }
+  });
+}
+
+
+
+
 
 // import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
 const isDevelopment = process.env.NODE_ENV !== 'production'
@@ -15,13 +39,26 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
 ])
 
+ipcMain.on('download-book',function(event,id,bookName){
+  console.log(bookName)
+  downloadFile('http://110.42.188.51/book/preview/'+id,bookName,function(){
+    console.log('下载成功:',bookName)
+    event.reply('download-book-reply', 'success')
+  });
+  
+})
 
-ipcMain.on('open-pdf', function(event, pdfUrl) {
-  openPdfWin(pdfUrl)
+ipcMain.on('open-pdf', function(event, pdfUrl,pageNum) {
+  openPdfWin(pdfUrl,pageNum)
   // event.sender.send('asynchronous-reply', 'pong');
 });
 
-function openPdfWin(pdfUrl){
+function downloadFile(uri,filename,callback){
+  let stream = fs.createWriteStream(path.join(constDict.bookPath, filename));
+  request(uri).pipe(stream).on('close', callback); 
+}
+
+function openPdfWin(bookName,pageNum){
   const pdfWin = new BrowserWindow({
     webPreferences: {
       // 插件支持
@@ -29,31 +66,28 @@ function openPdfWin(pdfUrl){
     }
   })
   pdfWin.maximize()
-  
-  // pdfWin.loadURL(pdfUrl)
-
-  // pdfWin.loadURL('file://' + __dirname + '/bundled/pdfviewer/web/viewer.html?file='+fileBlob+'' );
 
   if(isDevelopment){
     pdfWin.loadURL('file://' + __dirname + '/bundled/pdfviewer/web/viewer.html?file='+
-    encodeURIComponent('http://localhost:9090/getPdf?pdfName=a.pdf#page=100') );
+    encodeURIComponent('http://localhost:9090/getPdf?pdfName='+bookName)+'#page='+pageNum );
+    // encodeURIComponent('http://localhost:9090/getPdf?pdfName='+pdfName+'#'+pageNum) );
   }else{
     pdfWin.loadURL('file://' + __dirname + '/pdfviewer/web/viewer.html?file='+
-    encodeURIComponent('http://localhost:9090/getPdf?pdfName=a.pdf#page=100') );
+    encodeURIComponent('http://localhost:9090/getPdf?pdfName='+bookName)+'#page='+pageNum );
   }
 
-  
-  
 }
 
 function createHttpServer(){
+
+
   var server = http.createServer(function(req, res){
 
     let pathname = url.parse(req.url,true).pathname;
 
     if(pathname == '/getPdf'){
       let pdfName = url.parse(req.url,true).query.pdfName
-      var filepath = __dirname +'\\file\\'+ pdfName;
+      var filepath = path.join(constDict.bookPath,pdfName);
       fs.readFile(filepath, function (err, data) {
           if (err) {
               console.log("读取文件失败");
