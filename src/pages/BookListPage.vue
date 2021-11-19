@@ -39,8 +39,8 @@
                     />
                     <a-card-meta :title="val.bookName">
                         <template #description>
-                            <CloudDownloadOutlined :id="`download${val.id}`" @click="downloadBook(val.id,val.bookName+'.'+val.fileType)"/>
-                            <a-button style="float:right" type="primary" size="small" @click="openPdf('zzg_'+val.bookName+'.'+val.fileType)">阅读</a-button>
+                            <CloudDownloadOutlined v-if="!val.isDown" :id="`download${val.id}`" @click="downloadBook(val.id,val.fileName)"/>
+                            <a-button v-if="val.isDown" style="float:right" type="primary" size="small" @click="openPdf('zzg_'+val.bookName+'.'+val.fileType)">阅读</a-button>
                         </template>
                     </a-card-meta>
                 
@@ -52,20 +52,13 @@
 </template>
 
 <script>
-
-// const ipcRenderer  = window.ipcRenderer 
-
-
-
-// var fileDirPath = "D:\\Code\\electron\\cloud-reader-desktop\\dist_electron\\file";
-// var fileDirPath = path.join(__dirname, "file");
 import {CloudUploadOutlined,CloudDownloadOutlined,SmileOutlined}  from '@ant-design/icons-vue'
 import { notification  } from 'ant-design-vue';
 import {  h } from 'vue';
 
 
 export default {
-    inject: ['$axios','$constDict','$ipcRenderer','$path','$serverHost'],
+    inject: ['$axios','$constDict','$ipcRenderer','$path','$serverHost','$fs'],
     components: {
         CloudUploadOutlined,CloudDownloadOutlined
     },
@@ -74,9 +67,7 @@ export default {
             books:[],
             value:''
         }
-    }
-    ,
-
+    },
     methods:{
         downloadBook(id,bookName){
             const key = 'updatable';
@@ -87,10 +78,6 @@ export default {
                 description: bookName,
                 duration: 0,
                 placement:'bottomRight',
-                // style: {
-                //     width: '300px',
-                //     marginRight: `${0}px`,
-                // },
                 icon: h(SmileOutlined, { style: 'color: #108ee9' }),
 
             });
@@ -103,12 +90,15 @@ export default {
                             duration: 5,
                             placement:'bottomRight'
                             });
+                        for(const book of this.books){
+                            if(bookName == book.fileName){
+                                book.isDown = true
+                            }
+                        }    
                     }
                 })
             this.$ipcRenderer.send('download-book',id,'zzg_'+bookName)
             
-            // console.log(bookPath)
-            // console.log(this.$constDict.filePath)
         },
         onSearch(searchValue){
             console.log(searchValue)
@@ -118,21 +108,33 @@ export default {
             this.$axios.get(this.$serverHost+'/book/page')
             .then(res=>{
                 const result = res.data
-                // console.log(result)
                 this.books = result.data.list
-                // this.dataList = res.data;
+                this.loadLocalBooks()
             })
             .catch(err=>{
                 console.log(err);
+            })
+        },
+
+        loadLocalBooks(){
+            const that = this
+            
+            this.$fs.readdir(this.$constDict.bookPath,'utf8',function(err,data){
+                for(const localItem of data){
+                    
+                    for(const cloudItem of that.books){
+                        if(localItem == 'zzg_'+cloudItem.fileName){
+                            cloudItem.isDown = true
+                        }
+                    }
+                }
             })
         },
         openPdf(filename){
             this.$ipcRenderer.send('open-pdf',filename,'1')
                 
         },
-    }
-    ,
-
+    },
     created(){
         this.fetchBooks()
     }
