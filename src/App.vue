@@ -1,17 +1,20 @@
 <template>
   <div id="app">
-     <HomePage />
+     <!-- <HomePage /> -->
+     <!-- <LoginPage/> -->
+     <router-view></router-view>
   </div>
 </template>
 
 <script>
 import HomePage from './pages/HomePage.vue'
-const {remote} = window.require('electron')
+import LoginPage from './pages/LoginPage.vue'
 
 export default {
   name: 'App',
   components: {
-    HomePage
+    HomePage,
+    LoginPage
   }
 }
 </script>

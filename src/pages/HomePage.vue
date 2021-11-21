@@ -19,6 +19,10 @@
           <SettingOutlined />
           <span>设置</span>
         </a-menu-item>
+        <a-menu-item key="4"  @click="menuClick('/login')">
+          <LogoutOutlined />
+          <span>退出</span>
+        </a-menu-item>
       </a-menu>
 
         </div>
@@ -44,26 +48,12 @@
 </template>
 
 <script>
- import axios from 'axios';
- const {remote} = window.require('electron')
- const fs = window.require('fs')
 
-// const ipcRenderer  = window.ipcRenderer 
-const { ipcRenderer } =window.require('electron') 
-const path =window.require("path")
-
-var fileDirPath = "D:\\Code\\electron\\cloud-reader-desktop\\dist_electron\\file";
-// var fileDirPath = path.join(__dirname, "file");
-// console.log(fs.existsSync(fileDirPath))
-// if (!fs.existsSync(fileDirPath)) {
-//     fs.mkdirSync(fileDirPath);
-//     console.log("文件夹创建成功");
-// }
-import {SettingOutlined,MehOutlined,FileSearchOutlined} from '@ant-design/icons-vue'
+import {SettingOutlined,MehOutlined,FileSearchOutlined,LogoutOutlined} from '@ant-design/icons-vue'
 
 export default {
   components: {
-    SettingOutlined,MehOutlined,FileSearchOutlined
+    SettingOutlined,MehOutlined,FileSearchOutlined,LogoutOutlined
   },
   name: 'HelloWorld',
   props: {
@@ -81,30 +71,11 @@ export default {
     },
 
 
-    downFile(url, fileName) {
-          const request = window.request
-          const fs = window.fs
 
-            request(url, function (error, response, body) {
-                if (!error && response.statusCode == 200) {
-                    let stream = fs.createWriteStream(path.join(fileDirPath, fileName));
-                    request(url).pipe(stream).on("close", function (err) {
-                        console.log("下载成功");
-                    });
-                } else {
-                    if (error) {
-                        console.log(error);
-                    } else {
-                        console.log(response);
-                    }
-                }
-            });
-      
-    }
   },
   created(){
-    // this.downFile("http://110.42.188.51/book/preview/1","a.pdf")
-  }
+
+}
 }
 </script>
 
@@ -116,15 +87,18 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
   height: 100%;
+  min-height: 607px;
   }
 .ds_layout  .ant-layout-has-sider{
     border:1px solid #eee;
+    min-height: 607px;
   }
 .ds_layout  .ant-layout-sider-children{
     border-right:1px solid #eee;
   }
 .ds_layout  .ant-layout{
-    height:100%
+    height:100%;
+    min-height: 607px;
   }
 .ds_layout  .logo{
     padding:5px;

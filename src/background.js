@@ -7,12 +7,16 @@ const fs = require('fs')
 var url = require("url");
 var http = require("http");
 var request = require('request');
+const Store =  require('electron-store');
+const store = new Store()
 
 
 const os = require('os')
-//全局数据
+//全局变量
 global.constDict = {
-  bookPath:path.join(os.homedir(),'cloud_reader_desktop','books')
+  bookPath:path.join(os.homedir(),'cloud_reader_desktop','books'),
+  serverHost:'http://110.42.188.51',
+  // serverHost:'http://localhost:18081',
 };
 // 初始化文件目录
 if(!fs.existsSync(constDict.bookPath)){
@@ -41,7 +45,7 @@ protocol.registerSchemesAsPrivileged([
 
 ipcMain.on('download-book',function(event,id,bookName){
   console.log(bookName)
-  downloadFile('http://110.42.188.51/book/preview/'+id,bookName,function(){
+  downloadFile(constDict.serverHost+'/book/preview/'+id,bookName,function(){
     console.log('下载成功:',bookName)
     event.reply('download-book-reply', 'success')
   });
@@ -55,7 +59,9 @@ ipcMain.on('open-pdf', function(event, pdfUrl,pageNum) {
 
 function downloadFile(uri,filename,callback){
   let stream = fs.createWriteStream(path.join(constDict.bookPath, filename));
-  request(uri).pipe(stream).on('close', callback); 
+  request(uri,{
+    headers: {'Authorization': store.get('token')}
+  }).pipe(stream).on('close', callback); 
 }
 
 function openPdfWin(bookName,pageNum){

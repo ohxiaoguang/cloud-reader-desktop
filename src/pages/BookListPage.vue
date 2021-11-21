@@ -35,12 +35,12 @@
                     style="width:100%"
                     slot="cover"
                     
-                    :src="val.cover"
+                    :src="val.cover||'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fpic.soutu123.com%2Fback_pic%2F04%2F60%2F35%2F72586ca222efe89.jpg%21%2Ffw%2F700%2Fquality%2F90%2Funsharp%2Ftrue%2Fcompress%2Ftrue&refer=http%3A%2F%2Fpic.soutu123.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1640090844&t=79e394204c1b210298f0a74cc7693310'"
                     />
                     <a-card-meta :title="val.bookName">
                         <template #description>
                             <CloudDownloadOutlined v-if="!val.isDown" :id="`download${val.id}`" @click="downloadBook(val.id,val.fileName)"/>
-                            <a-button v-if="val.isDown" style="float:right" type="primary" size="small" @click="openPdf('zzg_'+val.bookName+'.'+val.fileType)">阅读</a-button>
+                            <a-button v-if="val.isDown" style="float:right" type="primary" size="small" @click="openPdf(val.fileName)">阅读</a-button>
                         </template>
                     </a-card-meta>
                 
@@ -58,7 +58,7 @@ import {  h } from 'vue';
 
 
 export default {
-    inject: ['$axios','$constDict','$ipcRenderer','$path','$serverHost','$fs'],
+    inject: ['$axios','$constDict','$ipcRenderer','$path','$serverHost','$fs','$electronStore'],
     components: {
         CloudUploadOutlined,CloudDownloadOutlined
     },
@@ -97,7 +97,7 @@ export default {
                         }    
                     }
                 })
-            this.$ipcRenderer.send('download-book',id,'zzg_'+bookName)
+            this.$ipcRenderer.send('download-book',id,bookName)
             
         },
         onSearch(searchValue){
@@ -105,7 +105,12 @@ export default {
             console.log(this.value)
         },
         fetchBooks(){
-            this.$axios.get(this.$serverHost+'/book/page')
+            this.$axios.get(this.$serverHost+'/book/person/'+this.$electronStore.get('user').id,
+            {
+                headers: {
+                'Authorization': this.$electronStore.get('token')
+                }
+            })
             .then(res=>{
                 const result = res.data
                 this.books = result.data.list
@@ -123,7 +128,7 @@ export default {
                 for(const localItem of data){
                     
                     for(const cloudItem of that.books){
-                        if(localItem == 'zzg_'+cloudItem.fileName){
+                        if(localItem == cloudItem.fileName){
                             cloudItem.isDown = true
                         }
                     }
