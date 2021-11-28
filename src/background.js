@@ -52,8 +52,8 @@ ipcMain.on('download-book',function(event,id,bookName){
   
 })
 
-ipcMain.on('open-pdf', function(event, pdfUrl,pageNum) {
-  openPdfWin(pdfUrl,pageNum)
+ipcMain.on('open-pdf', function(event, pdfUrl,pageNum,bookId) {
+  openPdfWin(pdfUrl,pageNum,bookId)
   // event.sender.send('asynchronous-reply', 'pong');
 });
 
@@ -64,7 +64,7 @@ function downloadFile(uri,filename,callback){
   }).pipe(stream).on('close', callback); 
 }
 
-function openPdfWin(bookName,pageNum){
+function openPdfWin(bookName,pageNum,bookId){
   const pdfWin = new BrowserWindow({
     webPreferences: {
       // 插件支持
@@ -75,11 +75,11 @@ function openPdfWin(bookName,pageNum){
 
   if(isDevelopment){
     pdfWin.loadURL('file://' + __dirname + '/bundled/pdfviewer/web/viewer.html?file='+
-    encodeURIComponent('http://localhost:9090/getPdf?pdfName='+bookName)+'#page='+pageNum );
+    encodeURIComponent('http://localhost:9090/getPdf?pdfName='+bookName)+'#page='+pageNum+'&bookId='+bookId );
     // encodeURIComponent('http://localhost:9090/getPdf?pdfName='+pdfName+'#'+pageNum) );
   }else{
     pdfWin.loadURL('file://' + __dirname + '/pdfviewer/web/viewer.html?file='+
-    encodeURIComponent('http://localhost:9090/getPdf?pdfName='+bookName)+'#page='+pageNum );
+    encodeURIComponent('http://localhost:9090/getPdf?pdfName='+bookName)+'#page='+pageNum+'&bookId='+bookId );
   }
 
 }
@@ -107,8 +107,19 @@ function createHttpServer(){
     }
     else if(pathname == '/updatePage'){
       // get获取数据
-      console.log(url.parse(req.url,true).query)
-      res.end('method2')
+      const {currPage,bookId} = url.parse(req.url,true).query
+
+      request({
+        url: constDict.serverHost+'/book/person/updateCurrPage',
+        method: "POST",
+        json: true,
+        headers: {'Authorization': store.get('token')},
+        body: {currPage: currPage,bookId:bookId}
+      }, function(error, response, body) {
+       
+        res.end('updatePage')
+      })
+
     }
     
 
@@ -120,8 +131,8 @@ async function createWindow() {
   
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 1035,
-    height: 665,
+    width: 1100,
+    height: 707,
     webPreferences: {
       
       // Use pluginOptions.nodeIntegration, leave this alone
@@ -184,6 +195,11 @@ app.on('ready', async () => {
       console.error('Vue Devtools failed to install:', e.toString())
     }
   }
+
+  if(isDevelopment){
+    constDict.serverHost = 'http://localhost:18081'
+  }
+
   createWindow()
   // 开启http服务器
   createHttpServer()

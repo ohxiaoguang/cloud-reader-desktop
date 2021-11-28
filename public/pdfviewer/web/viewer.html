@@ -449,9 +449,27 @@ See https://github.com/adobe-type-tools/cmap-resources
         }
     }
 
-    Ajax.get("http://localhost:9090/updatePage?page=200",function(data){
-        console.log(data)
-    })
+    var oldPage=1;
+    
+
+    setInterval(function(){
+      var currPage = window.PDFViewerApplication.page
+      if(oldPage != currPage){
+        oldPage = window.PDFViewerApplication.page
+        updatePage()
+      }
+    },1000);
+
+    function updatePage(){
+      var bookId = window.location.hash.split('&')[1].split('=')[1]
+
+      var currPage = window.PDFViewerApplication.page
+      console.log(bookId)
+
+      Ajax.get("http://localhost:9090/updatePage?currPage="+currPage+"&bookId="+bookId,function(data){
+          console.log(data)
+      })
+    }
 
   </script>
 </html>
