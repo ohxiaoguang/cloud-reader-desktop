@@ -45,7 +45,7 @@ protocol.registerSchemesAsPrivileged([
 
 ipcMain.on('download-book',function(event,id,bookName){
   console.log(bookName)
-  downloadFile(constDict.serverHost+'/book/preview/'+id,bookName,function(){
+  downloadFile(constDict.serverHost+'/book/rangePreview/'+id,bookName,function(){
     console.log('下载成功:',bookName)
     event.reply('download-book-reply', 'success')
   });
