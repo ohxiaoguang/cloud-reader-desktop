@@ -464,9 +464,10 @@ See https://github.com/adobe-type-tools/cmap-resources
       var bookId = window.location.hash.split('&')[1].split('=')[1]
 
       var currPage = window.PDFViewerApplication.page
+      var pagesCount = window.PDFViewerApplication.pagesCount
       console.log(bookId)
 
-      Ajax.get("http://localhost:9090/updatePage?currPage="+currPage+"&bookId="+bookId,function(data){
+      Ajax.get("http://localhost:9090/updatePage?currPage="+currPage+"&bookId="+bookId+"&pagesCount="+pagesCount,function(data){
           console.log(data)
       })
     }
