@@ -11,7 +11,7 @@
           <FileSearchOutlined />
           <span>书架</span>
         </a-menu-item>
-        <a-menu-item key="2">
+        <a-menu-item key="2"  @click="menuClick('/person')">
           <MehOutlined />
           <span>个人</span>
         </a-menu-item>
@@ -19,9 +19,9 @@
           <SettingOutlined />
           <span>设置</span>
         </a-menu-item>
-        <a-menu-item key="4"  @click="menuClick('/login')">
+        <a-menu-item key="4" @click="menuClick('/login')">
           <LogoutOutlined />
-          <span>退出</span>
+          <span >退出</span>
         </a-menu-item>
       </a-menu>
 

@@ -3,6 +3,7 @@ import SettingPage from '../pages/SettingPage'
 import BookListPage from '../pages/BookListPage'
 import LoginPage from '../pages/LoginPage'
 import HomePage from '../pages/HomePage'
+import PersonPage from '../pages/PersonPage'
 
 const routes = [
     { path: '/', redirect: '/login' },
@@ -19,6 +20,7 @@ const routes = [
       children:[
         { path: '/books',name:"books", component: BookListPage },
         { path: '/setting',name:"setting", component: SettingPage },
+        { path: '/person',name:"person", component: PersonPage },
       ]
     },
   ]

@@ -23,7 +23,7 @@
         <a-col class="gutter-row" :span="6">
             <a-progress :percent="30" />
         </a-col>
-        <a-col class="gutter-row" :span="9">
+        <a-col class="gutter-row" :span="7">
             <span>云空间：300M/1G</span>
         </a-col>
         <a-col class="gutter-row" :span="6">
@@ -33,6 +33,14 @@
                 placeholder="搜索"
                 @search="onSearch"
                 />
+        </a-col>
+
+        <a-col class="gutter-row" :span="2">
+            <a-button @click="fetchBooks">
+                <template #icon>
+                <RedoOutlined />
+                </template>
+            </a-button>
         </a-col>
         </a-row>
 
@@ -48,7 +56,7 @@
                     />
                     <a-card-meta :title="val.bookName">
                         <template #description>
-                            <CloudDownloadOutlined v-if="!val.isDown" :id="`download${val.id}`" @click="downloadBook(val.id,val.fileName)"/>
+                            <CloudDownloadOutlined v-if="!val.isDown" :id="`download${val.id}`" @click.stop="downloadBook(val.id,val.fileName)"/>
                             <a-button v-if="val.isDown" style="float:right" type="primary" size="small" @click.stop="openPdf(val)">阅读</a-button>
                         </template>
                     </a-card-meta>
@@ -71,15 +79,15 @@
 </template>
 
 <script>
-import {CloudUploadOutlined,CloudDownloadOutlined,SmileOutlined}  from '@ant-design/icons-vue'
+import {CloudUploadOutlined,CloudDownloadOutlined,SmileOutlined,RedoOutlined}  from '@ant-design/icons-vue'
 import { notification,message  } from 'ant-design-vue';
 import {  h } from 'vue';
 
 import defaultCover from '../assets/default_cover.png'
 export default {
-    inject: ['$axios','$constDict','$ipcRenderer','$path','$serverHost','$fs','$electronStore'],
+    inject: ['$axios','$ipcRenderer','$path','$serverHost','$fs','$electronStore'],
     components: {
-        CloudUploadOutlined,CloudDownloadOutlined
+        CloudUploadOutlined,CloudDownloadOutlined,RedoOutlined
     },
     data(){
         return{
@@ -193,7 +201,7 @@ export default {
         loadLocalBooks(){
             const that = this
             
-            this.$fs.readdir(this.$constDict.bookPath,'utf8',function(err,data){
+            this.$fs.readdir(this.$electronStore.get('bookPath'),'utf8',function(err,data){
                 for(const localItem of data){
                     
                     for(const cloudItem of that.books){
@@ -205,8 +213,6 @@ export default {
             })
         },
         openPdf(file){
-            
-
              this.$axios.get(this.$serverHost+'/book/person/personBook/'+file.bookId,
             {
                 headers:this.headers

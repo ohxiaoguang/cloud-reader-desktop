@@ -7,25 +7,27 @@ const fs = require('fs')
 var url = require("url");
 var http = require("http");
 var request = require('request');
+const os = require('os')
+
 const Store =  require('electron-store');
 const store = new Store()
 
+if(!store.has('bookPath')){
+  store.set("bookPath",path.join(os.homedir(),'cloud_reader_desktop','books'))
+}
+if(!store.has('serverHost')){
+  store.set("serverHost",'http://110.42.188.51')
+}
 
-const os = require('os')
-//全局变量
-global.constDict = {
-  bookPath:path.join(os.homedir(),'cloud_reader_desktop','books'),
-  serverHost:'http://110.42.188.51',
-};
+
 // 初始化文件目录
-if(!fs.existsSync(constDict.bookPath)){
-  fs.mkdir(constDict.bookPath,{recursive:true},(err)=>{
+if(!fs.existsSync(store.get('bookPath'))){
+  fs.mkdir(store.get('bookPath'),{recursive:true},(err)=>{
     if(err){
-        console.log('创建目录错误：',constDict.bookPath);
+        console.log('创建目录错误：',store.get('bookPath'));
         throw err;
-        
     }else{
-        console.log('创建目录成功：',constDict.bookPath);
+        console.log('创建目录成功：',store.get('bookPath'));
     }
   });
 }
@@ -41,7 +43,7 @@ protocol.registerSchemesAsPrivileged([
 
 ipcMain.on('download-book',function(event,id,bookName){
   console.log(bookName)
-  downloadFile(constDict.serverHost+'/book/rangePreview/'+id,bookName,function(){
+  downloadFile(store.get('serverHost')+'/book/rangePreview/'+id,bookName,function(){
     console.log('下载成功:',bookName)
     event.reply('download-book-reply', 'success')
   });
@@ -53,7 +55,7 @@ ipcMain.on('open-pdf', function(event, pdfUrl,pageNum,bookId) {
 });
 
 function downloadFile(uri,filename,callback){
-  let stream = fs.createWriteStream(path.join(constDict.bookPath, filename));
+  let stream = fs.createWriteStream(path.join(store.get('bookPath'), filename));
   request(uri,{
     headers: {'Authorization': store.get('token')}
   }).pipe(stream).on('close', callback); 
@@ -87,7 +89,7 @@ function createHttpServer(){
 
     if(pathname == '/getPdf'){
       let pdfName = url.parse(req.url,true).query.pdfName
-      var filepath = path.join(constDict.bookPath,pdfName);
+      var filepath = path.join(store.get('bookPath'),pdfName);
       fs.readFile(filepath, function (err, data) {
           if (err) {
               console.log("读取文件失败");
@@ -104,7 +106,7 @@ function createHttpServer(){
       const {currPage,bookId,pagesCount} = url.parse(req.url,true).query
 
       request({
-        url: constDict.serverHost+'/book/person/updateCurrPage',
+        url: store.get('serverHost')+'/book/person/updateCurrPage',
         method: "POST",
         json: true,
         headers: {'Authorization': store.get('token')},
@@ -169,7 +171,7 @@ app.on('ready', async () => {
   }
 
   if(isDevelopment){
-    constDict.serverHost = 'http://localhost:18081'
+    store.set("serverHost",'http://localhost:18081')
   }
 
   createWindow()
