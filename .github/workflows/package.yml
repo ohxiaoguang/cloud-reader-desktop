@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-2019, macos-10.15, ubuntu-18.04]
+        os: [windows-2019, macos-10.15]
 
     # create steps
     steps:
@@ -49,12 +49,12 @@ jobs:
           npm run electron:build
         env:
           GH_TOKEN: ${{ secrets.ZZG_TOKEN }}
-      - name: build Ubuntu app
-        if: matrix.os == 'ubuntu-18.04'
-        run: |
-          npm run electron:build
-        env:
-          GH_TOKEN: ${{ secrets.ZZG_TOKEN }}
+      # - name: build Ubuntu app
+      #   if: matrix.os == 'ubuntu-18.04'
+      #   run: |
+      #     npm run electron:build
+      #   env:
+      #     GH_TOKEN: ${{ secrets.ZZG_TOKEN }}
       # step5: cleanup artifacts in dist_electron
       - name: cleanup artifacts for windows
         if: matrix.os == 'windows-2019'
@@ -66,11 +66,11 @@ jobs:
         run: |
           mkdir artifacts
           mv dist_electron/*.dmg artifacts || true
-      - name: cleanup artifacts for Ubuntu
-        if: matrix.os == 'ubuntu-18.04'
-        run: |
-          mkdir artifacts
-          mv dist_electron/*.AppImage artifacts || true
+      # - name: cleanup artifacts for Ubuntu
+      #   if: matrix.os == 'ubuntu-18.04'
+      #   run: |
+      #     mkdir artifacts
+      #     mv dist_electron/*.AppImage artifacts || true
       # step6: upload artifacts
       - name: upload artifacts
         uses: actions/upload-artifact@v2

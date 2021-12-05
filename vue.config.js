@@ -31,9 +31,6 @@ module.exports = {
                 ]
             }]
           },
-          linux: {
-            icon: './public/favicon'
-          },
           mac: {
               icon: './public/favicon512.ico'
           },
