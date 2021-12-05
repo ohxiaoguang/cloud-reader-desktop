@@ -31,8 +31,11 @@ module.exports = {
                 ]
             }]
           },
+          linux: {
+            icon: './public/favicon512.ico'
+          },
           mac: {
-              icon: './public/favicon.ico'
+              icon: './public/favicon512.ico'
           },
           "dmg": {
             "contents": [{
